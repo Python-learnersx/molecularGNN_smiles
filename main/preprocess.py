@@ -7,13 +7,13 @@ from rdkit import Chem
 import torch
 
 
-def create_atoms(mol, atom_dict):
+def create_atoms(mol, atom_dict):  
     """Transform the atom types in a molecule (e.g., H, C, and O)
     into the indices (e.g., H=0, C=1, and O=2).
     Note that each atom index considers the aromaticity.
     """
-    atoms = [a.GetSymbol() for a in mol.GetAtoms()]
-    for a in mol.GetAromaticAtoms():
+    atoms = [a.GetSymbol() for a in mol.GetAtoms()]  
+    for a in mol.GetAromaticAtoms(): 
         i = a.GetIdx()
         atoms[i] = (atoms[i], 'aromatic')
     atoms = [atom_dict[a] for a in atoms]
@@ -27,12 +27,16 @@ def create_ijbonddict(mol, bond_dict):
     """
     i_jbond_dict = defaultdict(lambda: [])
     for b in mol.GetBonds():
-        i, j = b.GetBeginAtomIdx(), b.GetEndAtomIdx()
-        bond = bond_dict[str(b.GetBondType())]
-        i_jbond_dict[i].append((j, bond))
+        i, j = b.GetBeginAtomIdx(), b.GetEndAtomIdx()#获取键两端的序号
+        bond = bond_dict[str(b.GetBondType())]#获取键类型
+        i_jbond_dict[i].append((j, bond)) #递归添加节点周围相邻的信息
         i_jbond_dict[j].append((i, bond))
     return i_jbond_dict
-
+'''
+0 1
+1 2
+Input i_jbond_dict: defaultdict(<function create_ijbonddict.<locals>.<lambda> at 0x00000180E25D5F30>, {0: [(1, 0)], 1: [(0, 0), (2, 0)], 2: [(1, 0)]})
+'''
 
 def extract_fingerprints(radius, atoms, i_jbond_dict,
                          fingerprint_dict, edge_dict):
